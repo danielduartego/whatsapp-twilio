@@ -1,9 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const { MessagingResponse } = require('twilio').twiml;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const recentMessages = [];
+const MAX_MESSAGES = 50;
 
 // Twilio envia dados como application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
@@ -42,12 +45,26 @@ app.post('/webhook', (req, res) => {
   console.log(`   Timestamp: ${new Date().toISOString()}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+  recentMessages.unshift({
+    from: `${ProfileName || 'Sem nome'} (${From || 'desconhecido'})`,
+    body: Body || '',
+    timestamp: new Date().toISOString(),
+  });
+
+  if (recentMessages.length > MAX_MESSAGES) {
+    recentMessages.length = MAX_MESSAGES;
+  }
+
   // Resposta automática (TwiML)
   const twiml = new MessagingResponse();
-  twiml.message(`Olá ${ProfileName || ''}! Recebemos sua mensagem: "${Body}". Obrigado por entrar em contato com a Tatersal Digital! 🐴`);
+  twiml.message('Aqui é da Tatersal Digital, entraremos em contato.');
 
   res.type('text/xml');
   res.send(twiml.toString());
+});
+
+app.get('/messages', (req, res) => {
+  res.json({ messages: recentMessages });
 });
 
 // ============================================================
@@ -74,15 +91,7 @@ app.post('/status-callback', (req, res) => {
 // HEALTH CHECK
 // ============================================================
 app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    service: 'Tatersal Digital - Twilio WhatsApp Webhook',
-    timestamp: new Date().toISOString(),
-    endpoints: {
-      webhook: 'POST /webhook',
-      statusCallback: 'POST /status-callback',
-    }
-  });
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ============================================================

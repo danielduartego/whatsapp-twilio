@@ -1,5 +1,8 @@
 const { MessagingResponse } = require('twilio').twiml;
 
+const recentMessages = [];
+const MAX_MESSAGES = 50;
+
 // Helper para parsear application/x-www-form-urlencoded
 function parseUrlEncoded(body) {
   const params = {};
@@ -12,6 +15,10 @@ function parseUrlEncoded(body) {
 }
 
 module.exports = async (req, res) => {
+  if (req.method === 'GET') {
+    return res.status(200).json({ messages: recentMessages });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
@@ -50,9 +57,19 @@ module.exports = async (req, res) => {
   console.log(`   Timestamp: ${new Date().toISOString()}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+  recentMessages.unshift({
+    from: `${ProfileName || 'Sem nome'} (${From || 'desconhecido'})`,
+    body: Body || '',
+    timestamp: new Date().toISOString(),
+  });
+
+  if (recentMessages.length > MAX_MESSAGES) {
+    recentMessages.length = MAX_MESSAGES;
+  }
+
   // Resposta automática (TwiML)
   const twiml = new MessagingResponse();
-  twiml.message(`Olá ${ProfileName || ''}! Recebemos sua mensagem: "${Body}". Obrigado por entrar em contato com a Tatersal Digital! 🐴`);
+  twiml.message('Aqui é da Tatersal Digital, entraremos em contato.');
 
   res.setHeader('Content-Type', 'text/xml');
   res.status(200).send(twiml.toString());

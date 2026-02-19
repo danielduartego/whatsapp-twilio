@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tatersal Digital - Mensagens WhatsApp</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f5f5f5;
+        color: #111;
+      }
+      .container {
+        max-width: 900px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+      h1 { margin: 0 0 8px; }
+      p { margin: 0 0 20px; color: #444; }
+      .card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .meta {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      .empty {
+        background: #fff;
+        border: 1px dashed #ccc;
+        border-radius: 10px;
+        padding: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Mensagens WhatsApp recebidas</h1>
+      <p>Esta tela atualiza automaticamente a cada 2 segundos.</p>
+      <div id="list"></div>
+    </div>
+
+    <script>
+      async function loadMessages() {
+        const container = document.getElementById('list');
+        try {
+          const response = await fetch('/messages', { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error('Falha ao carregar mensagens');
+          }
+
+          const payload = await response.json();
+          const messages = payload.messages || [];
+
+          if (messages.length === 0) {
+            container.innerHTML = '<div class="empty">Nenhuma mensagem recebida ainda.</div>';
+            return;
+          }
+
+          container.innerHTML = messages
+            .map((msg) => {
+              const date = new Date(msg.timestamp).toLocaleString('pt-BR');
+              return `
+                <div class="card">
+                  <div class="meta">${date} • ${msg.from || 'sem remetente'}</div>
+                  <div><strong>Mensagem:</strong> ${msg.body || ''}</div>
+                </div>
+              `;
+            })
+            .join('');
+        } catch (error) {
+          container.innerHTML = `<div class="empty">Erro ao carregar mensagens: ${error.message}</div>`;
+        }
+      }
+
+      loadMessages();
+      setInterval(loadMessages, 2000);
+    </script>
+  </body>
+</html>

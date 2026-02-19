@@ -4,9 +4,15 @@
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/messages", "dest": "/api/webhook.js" },
     { "src": "/webhook", "dest": "/api/webhook.js" },
     { "src": "/status-callback", "dest": "/api/status-callback.js" }
   ]
