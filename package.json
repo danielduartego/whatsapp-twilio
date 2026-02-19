@@ -1,0 +1,19 @@
+{
+  "name": "tatersal-digital-twilio",
+  "version": "1.0.0",
+  "description": "Twilio WhatsApp webhook receiver for Tatersal Digital",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "vercel-dev": "vercel dev"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "twilio": "^5.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
